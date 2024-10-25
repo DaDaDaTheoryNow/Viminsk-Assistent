@@ -10,7 +10,7 @@ final speechToTextDataSourceProvider =
 });
 
 final speechToTextRepositoryProvider = Provider<SpeechToTextRepository>((ref) {
-  final datasource = ref.read(speechToTextDataSourceProvider);
+  final datasource = ref.watch(speechToTextDataSourceProvider);
   final repository = SpeechToTextRepositoryImpl(datasource);
 
   return repository;
