@@ -38,6 +38,7 @@ class HomeScreen extends ConsumerWidget {
             child: ListeningButton(
               onPressed: () async {
                 if (await requestForPermission()) {
+                  await speechToTextRepo.initialize();
                   speechToTextRepo.startListening((text) {
                     print("Recognized text: $text");
                   });
