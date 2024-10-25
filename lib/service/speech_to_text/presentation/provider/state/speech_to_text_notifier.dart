@@ -16,7 +16,10 @@ class SpeechToTextNotifier extends StateNotifier<bool> {
 
   Future<void> startListening(Function(String) onResult) async {
     await repository.startListening((String value) {
-      onResult(value);
+      if (value.isNotEmpty) {
+        onResult(value);
+      }
+
       stopListening();
     });
 
