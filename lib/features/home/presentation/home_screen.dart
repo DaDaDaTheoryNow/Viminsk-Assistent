@@ -25,7 +25,7 @@ class HomeScreen extends ConsumerWidget {
           Align(
             alignment: Alignment.center,
             child: Text(
-              'Готов слушать !',
+              "Готов слушать !",
               style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                     color: Colors.white,
                     fontSize: 20,
