@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import '../../../../utils/utils.dart';
 
 class ListeningButton extends StatelessWidget {
-  const ListeningButton({super.key});
+  final VoidCallback onPressed;
+  const ListeningButton({required this.onPressed, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(15),
       child: InkWell(
-        onTap: () {},
+        onTap: onPressed,
         borderRadius: BorderRadius.circular(60),
         child: Ink(
           width: WindowSize(context).width * 0.4,

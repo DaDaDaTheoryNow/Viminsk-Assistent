@@ -11,9 +11,17 @@ class SpeechToTextLocalDataSourceImpl implements SpeechToTextLocalDataSource {
 
   @override
   Future<void> startListening(Function(String) onResult) async {
-    await _speechToText.listen(onResult: (result) {
-      onResult(result.recognizedWords);
-    });
+    final options = SpeechListenOptions(
+      partialResults: false,
+    );
+
+    await _speechToText.listen(
+      localeId: "ru_Ru",
+      listenOptions: options,
+      onResult: (result) {
+        onResult(result.recognizedWords);
+      },
+    );
   }
 
   @override
