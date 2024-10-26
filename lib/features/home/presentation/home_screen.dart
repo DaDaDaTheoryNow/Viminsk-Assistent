@@ -17,10 +17,13 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final speechActionResult =
+        ref.watch(speechToTextNotifierProvider).speechActionResult;
     final isListening = ref.watch(speechToTextNotifierProvider).isListening;
     final soundLevel = ref.watch(speechToTextNotifierProvider).soundLevel;
     final recognizedWords =
         ref.watch(speechToTextNotifierProvider).recognizedWords;
+
     final speechToTextNotifier =
         ref.read(speechToTextNotifierProvider.notifier);
 
@@ -50,10 +53,10 @@ class HomeScreen extends ConsumerWidget {
             opacity: isListening ? 0.0 : 1.0,
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeIn,
-            child: const Center(
+            child: Center(
               child: Text(
-                "Запускаю Chrome",
-                style: TextStyle(
+                speechActionResult,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),

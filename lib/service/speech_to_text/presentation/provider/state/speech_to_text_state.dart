@@ -8,6 +8,7 @@ class SpeechToTextState with _$SpeechToTextState {
     @Default(false) bool isListening,
     @Default(0.0) double soundLevel,
     @Default("") String recognizedWords,
+    @Default("Привет, как дела?") String speechActionResult,
   }) = _SpeechToTextState;
 
   const SpeechToTextState._();
