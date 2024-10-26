@@ -18,7 +18,7 @@ class SpeechToTextLocalDataSourceImpl implements SpeechToTextLocalDataSource {
     required VoidCallback onDone,
   }) async {
     final options = SpeechListenOptions(
-      partialResults: false,
+      partialResults: true,
     );
 
     _speechToText.statusListener = (String status) {
@@ -30,9 +30,7 @@ class SpeechToTextLocalDataSourceImpl implements SpeechToTextLocalDataSource {
       listenOptions: options,
       onSoundLevelChange: onSoundLevelChange,
       onResult: (result) {
-        if (result.finalResult) {
-          onResult(result.recognizedWords);
-        }
+        onResult(result.recognizedWords);
       },
     );
   }

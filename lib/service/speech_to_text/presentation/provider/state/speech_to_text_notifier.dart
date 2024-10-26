@@ -15,14 +15,14 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
     }
   }
 
-  Future<void> startListening(Function(String) onResult) async {
+  Future<void> startListening() async {
     await repository.startListening(
-      onResult: onResult,
+      onResult: (words) => state = state.copyWith(recognizedWords: words),
       onSoundLevelChange: (value) => state = state.copyWith(soundLevel: value),
       onDone: () => stopListening(),
     );
 
-    state = state.copyWith(isListening: true);
+    state = state.copyWith(isListening: true, recognizedWords: "");
   }
 
   Future<void> stopListening() async {

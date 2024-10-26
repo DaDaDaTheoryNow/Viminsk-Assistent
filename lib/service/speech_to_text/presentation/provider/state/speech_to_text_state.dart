@@ -7,6 +7,7 @@ class SpeechToTextState with _$SpeechToTextState {
   const factory SpeechToTextState({
     @Default(false) bool isListening,
     @Default(0.0) double soundLevel,
+    @Default("") String recognizedWords,
   }) = _SpeechToTextState;
 
   const SpeechToTextState._();
