@@ -20,6 +20,7 @@ class SpeechActionRepositoryImpl extends SpeechActionRepository {
       "gmail": _runMail,
       "почту": _runMail,
       "найди": _searchInBrowser,
+      "привет": _hello
     };
 
     // Поиск подходящей команды
@@ -66,5 +67,9 @@ class SpeechActionRepositoryImpl extends SpeechActionRepository {
     }
 
     return "Вбил в браузер ваш запрос";
+  }
+
+  Future<String> _hello() async {
+    return "Привет";
   }
 }
