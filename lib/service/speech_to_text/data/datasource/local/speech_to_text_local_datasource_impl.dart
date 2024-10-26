@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:viminsk_assistent/service/speech_to_text/data/datasource/local/speech_to_text_local_datasource.dart';
 
@@ -10,16 +12,27 @@ class SpeechToTextLocalDataSourceImpl implements SpeechToTextLocalDataSource {
   }
 
   @override
-  Future<void> startListening(Function(String) onResult) async {
+  Future<void> startListening({
+    required Function(String) onResult,
+    required Function(double) onSoundLevelChange,
+    required VoidCallback onDone,
+  }) async {
     final options = SpeechListenOptions(
       partialResults: false,
     );
 
+    _speechToText.statusListener = (String status) {
+      if (status == "done") onDone();
+    };
+
     await _speechToText.listen(
-      localeId: "ru_Ru",
+      localeId: "ru_RU",
       listenOptions: options,
+      onSoundLevelChange: onSoundLevelChange,
       onResult: (result) {
-        onResult(result.recognizedWords);
+        if (result.finalResult) {
+          onResult(result.recognizedWords);
+        }
       },
     );
   }
@@ -28,7 +41,4 @@ class SpeechToTextLocalDataSourceImpl implements SpeechToTextLocalDataSource {
   Future<void> stopListening() async {
     await _speechToText.stop();
   }
-
-  @override
-  bool get isListening => _speechToText.isListening;
 }
