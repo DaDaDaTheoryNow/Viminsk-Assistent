@@ -23,12 +23,14 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
       onResult: (words) => state = state.copyWith(recognizedWords: words),
       onSoundLevelChange: (value) => state = state.copyWith(soundLevel: value),
       onDone: () async {
-        final resultString =
-            await speechActionRepository.processCommand(state.recognizedWords);
+        if (state.recognizedWords.isNotEmpty) {
+          final resultString = await speechActionRepository
+              .processCommand(state.recognizedWords);
 
-        state = state.copyWith(
-          speechActionResult: resultString,
-        );
+          state = state.copyWith(
+            speechActionResult: resultString,
+          );
+        }
 
         stopListening();
       },
