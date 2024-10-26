@@ -17,7 +17,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isListening = ref.watch(speechToTextNotifierProvider);
+    final isListening = ref.watch(speechToTextNotifierProvider).isListening;
     final speechToTextNotifier =
         ref.read(speechToTextNotifierProvider.notifier);
 

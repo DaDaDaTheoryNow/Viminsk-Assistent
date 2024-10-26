@@ -5,7 +5,6 @@ import 'package:viminsk_assistent/service/speech_to_text/data/datasource/local/s
 
 class SpeechToTextLocalDataSourceImpl implements SpeechToTextLocalDataSource {
   final SpeechToText _speechToText = SpeechToText();
-  Timer? _silenceTimer;
 
   @override
   Future<bool> initialize() async {
@@ -13,52 +12,33 @@ class SpeechToTextLocalDataSourceImpl implements SpeechToTextLocalDataSource {
   }
 
   @override
-  Future<void> startListening(Function(String) onResult) async {
+  Future<void> startListening({
+    required Function(String) onResult,
+    required Function(double) onSoundLevelChange,
+    required VoidCallback onDone,
+  }) async {
     final options = SpeechListenOptions(
       partialResults: false,
     );
 
+    _speechToText.statusListener = (String status) {
+      if (status == "done") onDone();
+    };
+
     await _speechToText.listen(
       localeId: "ru_RU",
       listenOptions: options,
+      onSoundLevelChange: onSoundLevelChange,
       onResult: (result) {
         if (result.finalResult) {
           onResult(result.recognizedWords);
-          _resetSilenceTimer(() => onResult(""));
-        } else {
-          _resetSilenceTimer(() => onResult(""));
         }
       },
     );
-
-    _startSilenceTimer(() {
-      onResult("");
-      stopListening();
-    });
   }
 
   @override
   Future<void> stopListening() async {
     await _speechToText.stop();
-    _cancelSilenceTimer();
-  }
-
-  @override
-  bool get isListening => _speechToText.isListening;
-
-  void _startSilenceTimer(VoidCallback onStop) {
-    _silenceTimer = Timer(const Duration(milliseconds: 2500), () {
-      onStop();
-    });
-  }
-
-  void _resetSilenceTimer(VoidCallback onStop) {
-    _cancelSilenceTimer();
-    _startSilenceTimer(onStop);
-  }
-
-  void _cancelSilenceTimer() {
-    _silenceTimer?.cancel();
-    _silenceTimer = null;
   }
 }
