@@ -35,7 +35,8 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
           );
         }
 
-        stopListening();
+        await stopListening();
+        await speak();
       },
     );
 
