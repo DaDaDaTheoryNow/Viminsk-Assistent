@@ -10,16 +10,16 @@ class SpeechActionRepositoryImpl extends SpeechActionRepository {
 
     // Карта команд и действий
     final commands = {
-      "запусти": runChrome,
-      "старт": runChrome,
-      "запуск": runChrome,
-      "перезапусти": runChrome,
-      "google": runChrome,
-      "chrome": runChrome,
-      "telegram": runTg,
-      "gmail": runMail,
-      "почту": runMail,
-      "найди": searchInBrowser,
+      "запусти": _runChrome,
+      "старт": _runChrome,
+      "запуск": _runChrome,
+      "перезапусти": _runChrome,
+      "google": _runChrome,
+      "chrome": _runChrome,
+      "telegram": _runTg,
+      "gmail": _runMail,
+      "почту": _runMail,
+      "найди": _searchInBrowser,
     };
 
     // Поиск подходящей команды
@@ -32,22 +32,22 @@ class SpeechActionRepositoryImpl extends SpeechActionRepository {
   }
 
 // Функции действий
-  Future<String> runChrome() async {
+  Future<String> _runChrome() async {
     await InstalledApps.startApp("com.android.chrome");
     return "Открыл Chrome";
   }
 
-  Future<String> runTg() async {
+  Future<String> _runTg() async {
     await InstalledApps.startApp("org.telegram.messenger");
     return "Открыл Telegram";
   }
 
-  Future<String> runMail() async {
+  Future<String> _runMail() async {
     await InstalledApps.startApp("com.google.android.gm");
     return "Открыл почту";
   }
 
-  Future<String> searchInBrowser() async {
+  Future<String> _searchInBrowser() async {
     // Создаем список слов, которые нужно удалить
     List<String> wordsToRemove = ["найди"];
 
