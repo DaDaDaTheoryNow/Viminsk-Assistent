@@ -26,7 +26,7 @@ class SoundLevelVisualizer extends StatelessWidget {
           height: heights[index].toDouble(),
           margin: const EdgeInsets.symmetric(horizontal: 5),
           decoration: BoxDecoration(
-            color: Colors.blue,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(5),
           ),
         );

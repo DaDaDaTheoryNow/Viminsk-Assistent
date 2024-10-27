@@ -3,11 +3,14 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:viminsk_assistent/service/speech_action/domain/repositories/speech_action_repository.dart';
 import 'package:viminsk_assistent/service/speech_to_text/domain/repositories/speech_to_text_repository.dart';
 import 'package:viminsk_assistent/service/speech_to_text/presentation/provider/state/speech_to_text_state.dart';
+import 'package:viminsk_assistent/service/text_to_speech/domain/repositories/text_to_speech_repository.dart';
 
 class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
   final SpeechToTextRepository speechToTextRepository;
   final SpeechActionRepository speechActionRepository;
-  SpeechToTextNotifier(this.speechToTextRepository, this.speechActionRepository)
+  final TextToSpeechRepository textToSpeechRepository;
+  SpeechToTextNotifier(this.speechToTextRepository, this.speechActionRepository,
+      this.textToSpeechRepository)
       : super(const SpeechToTextState());
 
   Future<bool> initialize() async {
@@ -27,12 +30,14 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
           final resultString = await speechActionRepository
               .processCommand(state.recognizedWords);
 
+          _speak(resultString);
+
           state = state.copyWith(
             speechActionResult: resultString,
           );
         }
 
-        stopListening();
+        await stopListening();
       },
     );
 
@@ -50,5 +55,9 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
     } else {
       return true;
     }
+  }
+
+  Future<void> _speak(String answer) async {
+    await textToSpeechRepository.speak(answer);
   }
 }
