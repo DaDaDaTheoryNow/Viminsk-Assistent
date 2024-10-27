@@ -3,10 +3,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:viminsk_assistent/service/speech_action/domain/repositories/speech_action_repository.dart';
 
 class SpeechActionRepositoryImpl extends SpeechActionRepository {
-  String messageForAnalysis = '';
   @override
   Future<String> processCommand(String message) async {
-    messageForAnalysis = message.toLowerCase();
+    final messageForAnalysis = message.toLowerCase();
 
     // Карта команд и действий
     final commands = {
@@ -19,7 +18,7 @@ class SpeechActionRepositoryImpl extends SpeechActionRepository {
       "telegram": _runTg,
       "gmail": _runMail,
       "почту": _runMail,
-      "найди": _searchInBrowser,
+      "найди": () => _searchInBrowser(messageForAnalysis),
       "привет": _hello
     };
 
@@ -48,14 +47,14 @@ class SpeechActionRepositoryImpl extends SpeechActionRepository {
     return "Открыл почту";
   }
 
-  Future<String> _searchInBrowser() async {
+  Future<String> _searchInBrowser(String message) async {
     // Создаем список слов, которые нужно удалить
     List<String> wordsToRemove = ["найди"];
 
     // Создаем регулярное выражение, которое найдет любое из слов из списка
     RegExp regExp = RegExp(wordsToRemove.join("|"));
 
-    String result = messageForAnalysis.replaceFirst(regExp, '');
+    String result = message.replaceFirst(regExp, '');
 
     final query = Uri.encodeComponent(result);
     final Uri uri = Uri.parse("https://www.google.com/search?q=$query");
