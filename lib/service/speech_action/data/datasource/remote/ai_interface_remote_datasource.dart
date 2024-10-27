@@ -36,7 +36,8 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
             () => _cancelToken = CancelToken());
         return '';
       } else {
-        throw Exception('Error during request: $e');
+        return '';
+        //throw Exception('Error during request: $e');
       }
     }
   }
@@ -49,7 +50,7 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
         {
           "role": "user",
           "content":
-              "'$question'. Context: Пожалуйста, отвечай коротко и ясно. Если задают вопрос о твоем имени или создателе, уточни, что ты — Viminsk, созданный командой из 167-й школы города Минска. Старайся использовать простые и понятные фразы."
+              "'$question'. Context: Пожалуйста, отвечай коротко и ясно. Отвечай на русском. Если задают вопрос о твоем имени или создателе, уточни, что ты — Viminsk, созданный командой из 167-й школы города Минска. Старайся использовать простые и понятные фразы."
         },
       ],
       "max_tokens": 400,
@@ -83,8 +84,7 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
     };
 
     String answer = await _postRequest(input);
-    print(answer);
-    return answer.replaceAll(RegExp(r"[\'\'[\]]"), "");
+    return answer.replaceAll(RegExp(r"[\'\[\]\s]"), "");
   }
 
   @override
