@@ -50,7 +50,7 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
         {
           "role": "user",
           "content":
-              "'$question'. Context: Пожалуйста, отвечай коротко и ясно. Отвечай на русском. Если задают вопрос о твоем имени или создателе, уточни, что ты — Viminsk, созданный командой из 167-й школы города Минска. Старайся использовать простые и понятные фразы."
+              "'$question'. Context: **Отвечай на Русском без других языков.** *Ты голосовой помощник* Пожалуйста, отвечай коротко и ясно. Если задают вопрос о твоем имени или создателе, уточни, что ты — Viminsk, созданный командой из 167-й школы города Минска. Старайся использовать простые и понятные фразы."
         },
       ],
       "max_tokens": 400,
@@ -95,10 +95,10 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
         {
           "role": "user",
           "content":
-              "Ответь одним словом startApp или question на этот вопрос: '$question'",
+              "Respond with a single word: either 'startApp' if there is a request to launch or open an app on the device, or 'question' if it’s a general question, depending on the content of the question: '$question'."
         },
       ],
-      "max_tokens": 300,
+      "max_tokens": 500,
     };
 
     String answer = await _postRequest(input);
