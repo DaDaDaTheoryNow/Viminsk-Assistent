@@ -24,6 +24,7 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
   }
 
   Future<void> startListening() async {
+    await textToSpeechRepository.stop();
     final tempSpeechActionResult = state.speechActionResult;
 
     state = state.copyWith(
@@ -53,7 +54,7 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
           await speechActionRepository.processCommand(state.recognizedWords);
 
       if (resultString.isNotEmpty) {
-        await _speak(resultString);
+        await textToSpeechRepository.speak(resultString);
         state = state.copyWith(
           isLoading: false,
           speechActionResult: resultString,
@@ -84,9 +85,5 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
 
   Future<bool> _requestMicrophonePermission() async {
     return await Permission.microphone.request() != PermissionStatus.denied;
-  }
-
-  Future<void> _speak(String answer) async {
-    await textToSpeechRepository.speak(answer);
   }
 }
