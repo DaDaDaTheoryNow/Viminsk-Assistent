@@ -20,6 +20,7 @@ class HomeScreen extends ConsumerWidget {
     final speechActionResult =
         ref.watch(speechToTextNotifierProvider).speechActionResult;
     final isListening = ref.watch(speechToTextNotifierProvider).isListening;
+    final isLoading = ref.watch(speechToTextNotifierProvider).isLoading;
     final soundLevel = ref.watch(speechToTextNotifierProvider).soundLevel;
     final recognizedWords =
         ref.watch(speechToTextNotifierProvider).recognizedWords;
@@ -35,48 +36,85 @@ class HomeScreen extends ConsumerWidget {
             speechToTextNotifier.startListening();
           }
         },
-        onStopRecording: () => speechToTextNotifier.stopListening(),
+        onStopRecording: () =>
+            speechToTextNotifier.stopListening(isForceCancel: true),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: Stack(
         children: [
-          AnimatedOpacity(
-            opacity: isListening ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
-            child: Center(
-              child: SoundLevelVisualizer(
-                soundLevel: soundLevel,
-              ),
-            ),
-          ),
-          AnimatedOpacity(
-            opacity: isListening ? 0.0 : 1.0,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeIn,
-            child: Center(
-              child: Text(
-                speechActionResult,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          AnimatedOpacity(
-            opacity: isListening ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 250),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  recognizedWords.isNotEmpty ? recognizedWords : '',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // sound visualizer
+              AnimatedOpacity(
+                opacity: isLoading
+                    ? 0.0
+                    : isListening
+                        ? 1.0
+                        : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: Center(
+                  child: SoundLevelVisualizer(
+                    soundLevel: soundLevel,
                   ),
                 ),
+              ),
+
+              // result of question
+              AnimatedOpacity(
+                opacity: isLoading
+                    ? 0.0
+                    : isListening
+                        ? 0.0
+                        : 1.0,
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeIn,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Text(
+                      speechActionResult,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // recognized words
+              AnimatedOpacity(
+                opacity: isLoading
+                    ? 0.0
+                    : isListening
+                        ? 1.0
+                        : 0.0,
+                duration: const Duration(milliseconds: 250),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      recognizedWords.isNotEmpty ? recognizedWords : '',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // loading
+          AnimatedOpacity(
+            opacity: isLoading ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
               ),
             ),
           ),

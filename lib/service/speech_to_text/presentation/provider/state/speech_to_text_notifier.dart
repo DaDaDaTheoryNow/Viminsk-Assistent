@@ -9,52 +9,81 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
   final SpeechToTextRepository speechToTextRepository;
   final SpeechActionRepository speechActionRepository;
   final TextToSpeechRepository textToSpeechRepository;
-  SpeechToTextNotifier(this.speechToTextRepository, this.speechActionRepository,
-      this.textToSpeechRepository)
-      : super(const SpeechToTextState());
+
+  SpeechToTextNotifier(
+    this.speechToTextRepository,
+    this.speechActionRepository,
+    this.textToSpeechRepository,
+  ) : super(const SpeechToTextState());
 
   Future<bool> initialize() async {
     if (await _requestMicrophonePermission()) {
       return await speechToTextRepository.initialize();
-    } else {
-      return false;
     }
+    return false;
   }
 
   Future<void> startListening() async {
-    await speechToTextRepository.startListening(
-      onResult: (words) => state = state.copyWith(recognizedWords: words),
-      onSoundLevelChange: (value) => state = state.copyWith(soundLevel: value),
-      onDone: () async {
-        if (state.recognizedWords.isNotEmpty) {
-          final resultString = await speechActionRepository
-              .processCommand(state.recognizedWords);
+    final tempSpeechActionResult = state.speechActionResult;
 
-          _speak(resultString);
-
-          state = state.copyWith(
-            speechActionResult: resultString,
-          );
-        }
-
-        await stopListening();
-      },
+    state = state.copyWith(
+      isListening: true,
+      speechActionResult: "",
+      recognizedWords: "",
     );
 
-    state = state.copyWith(isListening: true, recognizedWords: "");
+    await speechToTextRepository.startListening(
+      onResult: (words) {
+        state = state.copyWith(recognizedWords: words);
+      },
+      onSoundLevelChange: (value) {
+        state = state.copyWith(soundLevel: value);
+      },
+      onDone: () async {
+        await _handleListeningComplete(tempSpeechActionResult);
+      },
+    );
   }
 
-  Future<void> stopListening() async {
+  Future<void> _handleListeningComplete(String tempSpeechActionResult) async {
+    if (state.recognizedWords.isNotEmpty) {
+      state = state.copyWith(isLoading: true);
+
+      final resultString =
+          await speechActionRepository.processCommand(state.recognizedWords);
+
+      if (resultString.isNotEmpty) {
+        await _speak(resultString);
+        state = state.copyWith(
+          isLoading: false,
+          speechActionResult: resultString,
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          speechActionResult: tempSpeechActionResult,
+        );
+      }
+    } else {
+      state = state.copyWith(speechActionResult: tempSpeechActionResult);
+    }
+
+    await stopListening();
+  }
+
+  Future<void> stopListening({bool isForceCancel = false}) async {
+    if (isForceCancel) speechActionRepository.cancelProcessCommand();
+
     await speechToTextRepository.stopListening();
-    state = state.copyWith(isListening: false, soundLevel: 0.0);
+    state = state.copyWith(
+      isListening: false,
+      soundLevel: 0.0,
+      recognizedWords: "",
+    );
   }
 
   Future<bool> _requestMicrophonePermission() async {
-    if (await Permission.microphone.request() == PermissionStatus.denied) {
-      return false;
-    } else {
-      return true;
-    }
+    return await Permission.microphone.request() != PermissionStatus.denied;
   }
 
   Future<void> _speak(String answer) async {
