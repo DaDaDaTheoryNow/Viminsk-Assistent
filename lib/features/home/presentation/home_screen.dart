@@ -29,16 +29,14 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       floatingActionButton: ListeningButton(
-          isListening: isListening,
-          onStartRecording: () async {
-            if (await speechToTextNotifier.initialize()) {
-              speechToTextNotifier.startListening();
-            }
-          },
-          onStopRecording: () {
-            speechToTextNotifier.stopListening();
-            speechToTextNotifier.speak();
-          }),
+        isListening: isListening,
+        onStartRecording: () async {
+          if (await speechToTextNotifier.initialize()) {
+            speechToTextNotifier.startListening();
+          }
+        },
+        onStopRecording: () => speechToTextNotifier.stopListening(),
+      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
