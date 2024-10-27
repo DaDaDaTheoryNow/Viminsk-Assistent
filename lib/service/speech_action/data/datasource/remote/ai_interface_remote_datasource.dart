@@ -52,7 +52,7 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
               "'$question'. Context: Пожалуйста, отвечай коротко и ясно. Если задают вопрос о твоем имени или создателе, уточни, что ты — Viminsk, созданный командой из 167-й школы города Минска. Старайся использовать простые и понятные фразы."
         },
       ],
-      "max_tokens": 25,
+      "max_tokens": 400,
     };
 
     return await _postRequest(input);
@@ -76,13 +76,14 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
         {
           "role": "user",
           "content":
-              "'$question' Context: Please provide only the Android package name without unnecessary words and quotes from provided list. Example: xxx.xxx.xxx List: $listOfAppsTable",
+              "'$question'. Контекст: Ответом должен быть только один packageName из моего списка, в точности как указано. Ответ должен состоять только из одного packageName без других слов, текста или символов. Список приложений чтобы выбрать: $listOfAppsTable",
         },
       ],
       "max_tokens": 400,
     };
 
     String answer = await _postRequest(input);
+    print(answer);
     return answer.replaceAll(RegExp(r"[\'\'[\]]"), "");
   }
 
