@@ -150,10 +150,15 @@ class HomeScreen extends ConsumerWidget {
           // loading
           AnimatedOpacity(
             opacity: isLoading ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
+            duration: Duration(milliseconds: isLoading ? 1000 : 300),
             child: const Center(
-              child: CircularProgressIndicator(
-                color: Colors.white,
+              child: Text(
+                "Думаю...",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
