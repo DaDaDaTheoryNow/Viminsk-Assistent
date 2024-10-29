@@ -1,59 +1,60 @@
 import 'package:installed_apps/installed_apps.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:viminsk_assistent/service/speech_action/data/datasource/remote/ai_interface_datasource.dart';
+import 'package:viminsk_assistent/service/speech_action/domain/models/action_type.dart';
 import 'package:viminsk_assistent/service/speech_action/domain/repositories/speech_action_repository.dart';
 
 class SpeechActionRepositoryImpl extends SpeechActionRepository {
+  final AIInterfaceDataSource aiInterfaceDataSource;
+
+  SpeechActionRepositoryImpl(this.aiInterfaceDataSource);
+
+  @override
+  void cancelProcessCommand() {
+    aiInterfaceDataSource.cancelRequest();
+  }
+
   @override
   Future<String> processCommand(String message) async {
     final messageForAnalysis = message.toLowerCase();
 
-    // Карта команд и действий
-    final commands = {
-      "запусти": _runChrome,
-      "старт": _runChrome,
-      "запуск": _runChrome,
-      "перезапусти": _runChrome,
-      "google": _runChrome,
-      "chrome": _runChrome,
-      "telegram": _runTg,
-      "gmail": _runMail,
-      "почту": _runMail,
-      "найди": () => _searchInBrowser(messageForAnalysis),
-      "привет": _hello
-    };
-
-    // Поиск подходящей команды
-    for (var entry in commands.entries) {
-      if (messageForAnalysis.contains(entry.key)) {
-        return await entry.value();
-      }
+    if (messageForAnalysis.contains("загугли") ||
+        messageForAnalysis.contains("найди")) {
+      _searchInBrowser(messageForAnalysis);
+      return "Выполнил поиск";
     }
-    return "Неизвестная команда";
-  }
 
-// Функции действий
-  Future<String> _runChrome() async {
-    await InstalledApps.startApp("com.android.chrome");
-    return "Открыл Chrome";
-  }
+    final questionType =
+        await aiInterfaceDataSource.questionType(question: messageForAnalysis);
 
-  Future<String> _runTg() async {
-    await InstalledApps.startApp("org.telegram.messenger");
-    return "Открыл Telegram";
-  }
+    switch (questionType) {
+      case ActionType.startApp:
+        if (messageForAnalysis.contains("браузер") ||
+            messageForAnalysis.contains("chrome") ||
+            messageForAnalysis.contains("поисковик")) {
+          return _startBrowser();
+        }
 
-  Future<String> _runMail() async {
-    await InstalledApps.startApp("com.google.android.gm");
-    return "Открыл почту";
+        final appPackage =
+            await aiInterfaceDataSource.startApp(question: messageForAnalysis);
+
+        if (appPackage.isEmpty) return "";
+
+        final bool? isSuccess = await InstalledApps.startApp(appPackage);
+        return isSuccess ?? false
+            ? "Запустил приложение"
+            : "Не смог запустить приложение";
+      case ActionType.question:
+        return await aiInterfaceDataSource.questionAnswer(
+            question: messageForAnalysis);
+      default:
+        return "Неизвестная команда";
+    }
   }
 
   Future<String> _searchInBrowser(String message) async {
-    // Создаем список слов, которые нужно удалить
     List<String> wordsToRemove = ["найди"];
-
-    // Создаем регулярное выражение, которое найдет любое из слов из списка
     RegExp regExp = RegExp(wordsToRemove.join("|"));
-
     String result = message.replaceFirst(regExp, '');
 
     final query = Uri.encodeComponent(result);
@@ -68,7 +69,15 @@ class SpeechActionRepositoryImpl extends SpeechActionRepository {
     return "Вбил в браузер ваш запрос";
   }
 
-  Future<String> _hello() async {
-    return "Привет";
+  Future<String> _startBrowser() async {
+    final Uri uri = Uri.parse("https://www.google.com/search");
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      return 'Не удалось открыть браузер';
+    }
+
+    return "Запустил приложение";
   }
 }

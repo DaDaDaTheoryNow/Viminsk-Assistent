@@ -33,10 +33,10 @@ class ListeningButton extends ConsumerWidget {
             end: Alignment.bottomLeft,
             colors: [
               isListening
-                  ? Colors.redAccent
-                  : const Color.fromARGB(255, 49, 47, 47),
+                  ? const Color.fromARGB(191, 255, 255, 255)
+                  : const Color.fromARGB(255, 28, 27, 27),
               isListening
-                  ? const Color.fromARGB(255, 41, 40, 40)
+                  ? const Color.fromARGB(255, 21, 21, 21)
                   : const Color.fromARGB(255, 82, 81, 81),
             ],
           ),

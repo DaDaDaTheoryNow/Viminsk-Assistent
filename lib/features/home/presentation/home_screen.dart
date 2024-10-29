@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mesh_gradient/mesh_gradient.dart';
 import 'package:viminsk_assistent/features/home/presentation/widgets/sound_level_visualizer.dart';
 import 'package:viminsk_assistent/service/speech_to_text/presentation/provider/speech_to_text_notifier_provider.dart';
 
@@ -20,6 +23,7 @@ class HomeScreen extends ConsumerWidget {
     final speechActionResult =
         ref.watch(speechToTextNotifierProvider).speechActionResult;
     final isListening = ref.watch(speechToTextNotifierProvider).isListening;
+    final isLoading = ref.watch(speechToTextNotifierProvider).isLoading;
     final soundLevel = ref.watch(speechToTextNotifierProvider).soundLevel;
     final recognizedWords =
         ref.watch(speechToTextNotifierProvider).recognizedWords;
@@ -35,47 +39,125 @@ class HomeScreen extends ConsumerWidget {
             speechToTextNotifier.startListening();
           }
         },
-        onStopRecording: () => speechToTextNotifier.stopListening(),
+        onStopRecording: () =>
+            speechToTextNotifier.stopListening(isForceCancel: true),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      body: Stack(
         children: [
+          // bg animation
           AnimatedOpacity(
-            opacity: isListening ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
-            child: Center(
-              child: SoundLevelVisualizer(
-                soundLevel: soundLevel,
-              ),
-            ),
-          ),
-          AnimatedOpacity(
-            opacity: isListening ? 0.0 : 1.0,
-            duration: const Duration(milliseconds: 250),
+            opacity: isListening ? 0.8 : 0.0,
+            duration: const Duration(milliseconds: 1200),
             curve: Curves.easeIn,
-            child: Center(
-              child: Text(
-                speechActionResult,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+            child: AnimatedMeshGradient(
+              colors: const [
+                Color.fromARGB(255, 60, 59, 59),
+                Colors.black,
+                Color.fromARGB(255, 111, 109, 109),
+                Colors.black,
+              ],
+              options: AnimatedMeshGradientOptions(
+                amplitude: 2000,
+                frequency: 300,
+                grain: 0.3,
+                speed: 15,
+              ),
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
                 ),
               ),
             ),
           ),
-          AnimatedOpacity(
-            opacity: isListening ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 250),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  recognizedWords.isNotEmpty ? recognizedWords : '',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+
+          // content
+          Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // sound visualizer
+                  AnimatedOpacity(
+                    opacity: isLoading
+                        ? 0.0
+                        : isListening
+                            ? 1.0
+                            : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: Center(
+                      child: SoundLevelVisualizer(
+                        soundLevel: soundLevel,
+                      ),
+                    ),
                   ),
+
+                  // result of question
+                  AnimatedOpacity(
+                    opacity: isLoading
+                        ? 0.0
+                        : isListening
+                            ? 0.0
+                            : 1.0,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeIn,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(30),
+                        child: Text(
+                          speechActionResult,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // recognized words
+                  AnimatedOpacity(
+                    opacity: isLoading
+                        ? 0.0
+                        : isListening
+                            ? 1.0
+                            : 0.0,
+                    duration: const Duration(milliseconds: 250),
+                    child: Center(
+                      child: SingleChildScrollView(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            recognizedWords.isNotEmpty ? recognizedWords : '',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // loading
+          AnimatedOpacity(
+            opacity: isLoading ? 1.0 : 0.0,
+            duration: Duration(milliseconds: isLoading ? 1000 : 300),
+            child: const Center(
+              child: Text(
+                "Думаю...",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
