@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:installed_apps/installed_apps.dart';
+import 'package:viminsk_assistent/config/contants.dart';
 import 'package:viminsk_assistent/service/speech_action/data/datasource/remote/ai_interface_datasource.dart';
 import 'package:viminsk_assistent/service/speech_action/domain/models/action_type.dart';
 
 class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
   final Dio dio;
-  final String apiKey = "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";
 
   CancelToken _cancelToken = CancelToken();
   List<Map<String, String>> listOfAppsTable = [];
 
   AIInterfaceRemoteDataSource() : dio = Dio() {
-    dio.options.headers['Authorization'] = "Bearer $apiKey";
+    dio.options.headers['Authorization'] = "Bearer $kApiKey";
     dio.options.headers['Content-Type'] = "application/json";
   }
 
@@ -95,10 +95,10 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
         {
           "role": "user",
           "content":
-              "Respond with a single word: either 'startApp' if there is a request to launch or open an app on the device, or 'question' if it’s a general question, depending on the content of the question: '$question'."
+              "Отвечай 'startApp' если тебя просят запустить или открыть приложение, или 'question' if it’s a general question, depending on the content of the question: '$question'."
         },
       ],
-      "max_tokens": 500,
+      "max_tokens": 300,
     };
 
     String answer = await _postRequest(input);

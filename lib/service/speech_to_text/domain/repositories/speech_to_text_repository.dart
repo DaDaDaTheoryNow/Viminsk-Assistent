@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 
 abstract class SpeechToTextRepository {
-  Future<bool> initialize();
+  //offline recognize
+  Future<bool> initializeOffline();
 
-  Future<void> startListening({
-    required Function(String) onResult,
-    required Function(double) onSoundLevelChange,
-    required VoidCallback onDone,
+  Future<void> startOfflineListeningForCall({
+    required VoidCallback onCallAssistant,
   });
 
-  Future<void> stopListening();
+  Future<void> stopOfflineListening();
+
+  //online recognize
+  Future<void> startOnlineListeningForCommand({
+    required Function(double) onSoundLevelChange,
+    required VoidCallback onOfflineSpeechRecognized,
+    required VoidCallback onOnlineRecognizingError,
+    required Function(String) onDone,
+  });
+
+  Future<void> stopOnlineListening();
 }
