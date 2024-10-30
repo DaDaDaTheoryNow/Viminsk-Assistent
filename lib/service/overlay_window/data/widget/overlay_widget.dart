@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:viminsk_assistent/service/speech_to_text/presentation/provider/speech_to_text_notifier_provider.dart';
 
 class OverlayWidget extends ConsumerWidget {
   const OverlayWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final speechToTextNotifier =
-        ref.read(speechToTextNotifierProvider.notifier);
+    // Объявляем локальный канал внутри оверлея
+    const platform = MethodChannel('overlay_channel');
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -16,8 +16,10 @@ class OverlayWidget extends ConsumerWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            if (await speechToTextNotifier.initialize()) {
-              speechToTextNotifier.startListening();
+            try {
+              await platform.invokeMethod('startSpeechRecognition');
+            } on PlatformException catch (e) {
+              print("Ошибка при вызове метода: ${e.message}");
             }
           },
           child: Container(
