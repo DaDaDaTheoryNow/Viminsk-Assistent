@@ -18,70 +18,105 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
 
   Future<bool> initialize() async {
     if (await _requestMicrophonePermission()) {
-      return await speechToTextRepository.initialize();
+      return await speechToTextRepository.initializeOffline();
     }
     return false;
   }
 
-  Future<void> startListening() async {
-    await textToSpeechRepository.stop();
-    final tempSpeechActionResult = state.speechActionResult;
+  Future<void> startListeningForCommand() async {
+    if (await initialize()) {
+      await speechToTextRepository.startOfflineListeningForCall(
+        onCallAssistant: () async {
+          state = state.copyWith(isListening: true);
+          await speechToTextRepository.stopOfflineListening();
 
-    state = state.copyWith(
-      isListening: true,
-      speechActionResult: "",
-      recognizedWords: "",
-    );
+          await speechToTextRepository.startOnlineListeningForCommand(
+            onSoundLevelChange: (value) =>
+                state = state.copyWith(soundLevel: value),
+            onOfflineSpeechRecognized: () =>
+                state = state.copyWith(isLoading: true),
+            onOnlineRecognizingError: () {
+              stopListening();
+              startListeningForCommand();
+            },
+            onDone: (command) async {
+              await speechToTextRepository.stopOnlineListening();
 
-    await speechToTextRepository.startListening(
-      onResult: (words) {
-        state = state.copyWith(recognizedWords: words);
-      },
-      onSoundLevelChange: (value) {
-        state = state.copyWith(soundLevel: value);
-      },
-      onDone: () async {
-        await _handleListeningComplete(tempSpeechActionResult);
-      },
-    );
-  }
+              if (command.isNotEmpty) {
+                final resultString =
+                    await speechActionRepository.processCommand(command);
 
-  Future<void> _handleListeningComplete(String tempSpeechActionResult) async {
-    if (state.recognizedWords.isNotEmpty) {
-      state = state.copyWith(isLoading: true);
+                if (resultString.isNotEmpty) {
+                  await textToSpeechRepository.speak(resultString);
 
-      final resultString =
-          await speechActionRepository.processCommand(state.recognizedWords);
+                  state = state.copyWith(
+                    isLoading: false,
+                    speechActionResult: resultString,
+                  );
+                } else {
+                  state = state.copyWith(
+                    isLoading: false,
+                    //speechActionResult: tempSpeechActionResult,
+                  );
+                }
+              }
 
-      if (resultString.isNotEmpty) {
-        await textToSpeechRepository.speak(resultString);
-        state = state.copyWith(
-          isLoading: false,
-          speechActionResult: resultString,
-        );
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          speechActionResult: tempSpeechActionResult,
-        );
-      }
-    } else {
-      state = state.copyWith(speechActionResult: tempSpeechActionResult);
+              // for test call again
+              stopListening();
+              startListeningForCommand();
+            },
+          );
+        },
+      );
     }
-
-    await stopListening();
   }
 
   Future<void> stopListening({bool isForceCancel = false}) async {
     if (isForceCancel) speechActionRepository.cancelProcessCommand();
 
-    await speechToTextRepository.stopListening();
     state = state.copyWith(
       isListening: false,
       soundLevel: 0.0,
       recognizedWords: "",
     );
   }
+
+  // Future<void> _handleListeningComplete(String tempSpeechActionResult) async {
+  //   if (state.recognizedWords.isNotEmpty) {
+  //     state = state.copyWith(isLoading: true);
+
+  //     final resultString =
+  //         await speechActionRepository.processCommand(state.recognizedWords);
+
+  //     if (resultString.isNotEmpty) {
+  //       await textToSpeechRepository.speak(resultString);
+  //       state = state.copyWith(
+  //         isLoading: false,
+  //         speechActionResult: resultString,
+  //       );
+  //     } else {
+  //       state = state.copyWith(
+  //         isLoading: false,
+  //         speechActionResult: tempSpeechActionResult,
+  //       );
+  //     }
+  //   } else {
+  //     state = state.copyWith(speechActionResult: tempSpeechActionResult);
+  //   }
+
+  //   await stopListening();
+  // }
+
+  // Future<void> stopListening({bool isForceCancel = false}) async {
+  //   if (isForceCancel) speechActionRepository.cancelProcessCommand();
+
+  //   await speechToTextRepository.stopListening();
+  //   state = state.copyWith(
+  //     isListening: false,
+  //     soundLevel: 0.0,
+  //     recognizedWords: "",
+  //   );
+  // }
 
   Future<bool> _requestMicrophonePermission() async {
     return await Permission.microphone.request() != PermissionStatus.denied;

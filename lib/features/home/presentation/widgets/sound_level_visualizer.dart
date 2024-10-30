@@ -12,7 +12,7 @@ class SoundLevelVisualizer extends StatelessWidget {
     final heights = List.generate(7, (index) {
       double randomFactor = Random().nextDouble();
       // Amplify the height impact and adjust for more pronounced response
-      return ((soundLevel + 10) * 6 * randomFactor)
+      return ((soundLevel + 10) * 4 * randomFactor)
           .clamp(10, 120); // Increased max height
     });
 
