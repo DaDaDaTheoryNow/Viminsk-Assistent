@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
 import 'package:viminsk_assistent/features/home/presentation/widgets/sound_level_visualizer.dart';
 import 'package:viminsk_assistent/service/speech_to_text/presentation/provider/speech_to_text_notifier_provider.dart';
-
 import 'widgets/listening_button.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -72,7 +71,6 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
           ),
-
           // content
           Center(
             child: SingleChildScrollView(
