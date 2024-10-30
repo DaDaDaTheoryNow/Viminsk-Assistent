@@ -9,8 +9,6 @@ import 'package:viminsk_assistent/service/speech_to_text/presentation/provider/s
 import 'config/routes/routes_provider.dart';
 import 'config/theme/app_theme.dart';
 
-final providerContainer = ProviderContainer();
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -19,32 +17,14 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Method channel for overlay communication
-  const platform = MethodChannel('overlay_channel');
-  platform.setMethodCallHandler((MethodCall call) async {
-    if (call.method == 'startSpeechRecognition') {
-      final speechToTextNotifier =
-          providerContainer.read(speechToTextNotifierProvider.notifier);
-      if (await speechToTextNotifier.initialize()) {
-        speechToTextNotifier.startListening();
-      }
-    }
-  });
-
-  // Run the app with the ProviderContainer
-  runApp(ProviderScope(
-    parent: providerContainer,
+  // Запускаем приложение
+  runApp(const ProviderScope(
     child: MyApp(),
   ));
 }
 
 @pragma("vm:entry-point")
 void overlayMain() {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Инициализируем канал здесь для оверлея
-  const platform = MethodChannel('overlay_channel');
-
   runApp(const ProviderScope(child: OverlayWidget()));
 }
 
@@ -63,7 +43,8 @@ class MyApp extends ConsumerWidget {
           ref.read(overlayWindowRepositoriesProvider).stopOverlay();
           print('Приложение восстановлено');
         },
-        AppLifecycleState.paused: () {
+        AppLifecycleState.paused: () async {
+          await Future.delayed(const Duration(milliseconds: 200));
           ref.read(overlayWindowRepositoriesProvider).startOverlay(context);
           print('Приложение приостановлено');
         },

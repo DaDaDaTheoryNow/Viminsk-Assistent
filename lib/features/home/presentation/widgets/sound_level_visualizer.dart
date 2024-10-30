@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:viminsk_assistent/utils/utils.dart';
 
 class SoundLevelVisualizer extends StatelessWidget {
   final double soundLevel;
@@ -22,9 +23,10 @@ class SoundLevelVisualizer extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300), // Faster response time
           curve: Curves.easeInOut,
-          width: 10,
+          width: WindowSize(context).width * 0.03,
           height: heights[index].toDouble(),
-          margin: const EdgeInsets.symmetric(horizontal: 5),
+          margin: EdgeInsets.symmetric(
+              horizontal: WindowSize(context).width * 0.015),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(5),
