@@ -39,6 +39,11 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
             onOfflineSpeechRecognized: () =>
                 state = state.copyWith(isLoading: true),
             onOnlineRecognizingError: () {
+              state = state.copyWith(
+                isLoading: false,
+                speechActionResult: tempSpeechActionResult,
+              );
+
               stopListening();
               startListeningForCommand();
             },
