@@ -5,42 +5,50 @@ import 'package:mesh_gradient/mesh_gradient.dart';
 import 'package:viminsk_assistent/features/home/presentation/widgets/sound_level_visualizer.dart';
 import 'package:viminsk_assistent/service/speech_to_text/presentation/provider/speech_to_text_notifier_provider.dart';
 
-import 'widgets/listening_button.dart';
-
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   static HomeScreen builder(
     BuildContext context,
     GoRouterState state,
   ) =>
       const HomeScreen();
-
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    ref.read(speechToTextNotifierProvider.notifier).startListeningForCommand();
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final speechActionResult =
         ref.watch(speechToTextNotifierProvider).speechActionResult;
     final isListening = ref.watch(speechToTextNotifierProvider).isListening;
     final isLoading = ref.watch(speechToTextNotifierProvider).isLoading;
     final soundLevel = ref.watch(speechToTextNotifierProvider).soundLevel;
-    final recognizedWords =
-        ref.watch(speechToTextNotifierProvider).recognizedWords;
+    // final recognizedWords =
+    //     ref.watch(speechToTextNotifierProvider).recognizedWords;
 
-    final speechToTextNotifier =
-        ref.read(speechToTextNotifierProvider.notifier);
+    // final speechToTextNotifier =
+    //     ref.read(speechToTextNotifierProvider.notifier);
 
     return Scaffold(
-      floatingActionButton: ListeningButton(
-        isListening: isListening,
-        onStartRecording: () async {
-          if (await speechToTextNotifier.initialize()) {
-            speechToTextNotifier.startListening();
-          }
-        },
-        onStopRecording: () =>
-            speechToTextNotifier.stopListening(isForceCancel: true),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      // floatingActionButton: ListeningButton(
+      //   isListening: isListening,
+      //   onStartRecording: () async {
+      //     // if (await speechToTextNotifier.initialize()) {
+      //     //   speechToTextNotifier.startListening();
+      //     // }
+      //   },
+      //   onStopRecording: () {},
+      // ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: Stack(
         children: [
           // bg animation
@@ -103,38 +111,13 @@ class HomeScreen extends ConsumerWidget {
                     curve: Curves.easeIn,
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.all(30),
+                        padding: EdgeInsets.all(isListening ? 0 : 30),
                         child: Text(
                           speechActionResult,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 24,
+                          style: TextStyle(
+                            fontSize: isListening ? 0 : 24,
                             fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // recognized words
-                  AnimatedOpacity(
-                    opacity: isLoading
-                        ? 0.0
-                        : isListening
-                            ? 1.0
-                            : 0.0,
-                    duration: const Duration(milliseconds: 250),
-                    child: Center(
-                      child: SingleChildScrollView(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Text(
-                            recognizedWords.isNotEmpty ? recognizedWords : '',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
                           ),
                         ),
                       ),
