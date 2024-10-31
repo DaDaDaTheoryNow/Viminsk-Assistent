@@ -26,8 +26,10 @@ class SpeechToTextLocalDataSource
       model = await vosk.createModel(await modelLoader
           .loadFromAssets("assets/models/vosk-model-small-ru-0.22.zip"));
 
-      _recognizer =
-          await vosk.createRecognizer(model: model, sampleRate: 16000);
+      _recognizer = await vosk.createRecognizer(
+        model: model,
+        sampleRate: 16000,
+      );
       return true;
     } catch (e) {
       debugPrint(e.toString());

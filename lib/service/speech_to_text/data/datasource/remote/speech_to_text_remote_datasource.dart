@@ -21,7 +21,7 @@ class SpeechToTextRemoteDataSource
 
   final AudioRecorder _recorder = AudioRecorder();
   Timer? _silenceTimer;
-  final double amplitudeThreshold = 4.2;
+  final double amplitudeThreshold = 5;
   final Duration silenceDuration =
       const Duration(seconds: 1, milliseconds: 700);
 
@@ -43,7 +43,6 @@ class SpeechToTextRemoteDataSource
     await _recorder.start(
       (Platform.isWindows)
           ? const RecordConfig(
-              sampleRate: 16000,
               encoder: AudioEncoder.pcm16bits,
             )
           : const RecordConfig(),
@@ -52,6 +51,7 @@ class SpeechToTextRemoteDataSource
 
     _resetSilenceTimer(
         onDone, onOfflineSpeechRecognized, onOnlineRecognizingError);
+
     startListeningForCommandStream =
         _recorder.onAmplitudeChanged(Durations.medium4).listen((amplitude) {
       double normalizedValue = ((amplitude.current + 160) / 160) * 20 - 10;
@@ -85,7 +85,6 @@ class SpeechToTextRemoteDataSource
       if (pathToFile != null) {
         try {
           final file = File(pathToFile);
-
           final bytes = await file.readAsBytes();
 
           final response = await dio.post(
@@ -93,7 +92,7 @@ class SpeechToTextRemoteDataSource
             data: bytes,
           );
 
-          onDone((response.data["text"] as String).trim());
+          onDone((response.data["text"] as String).trim().replaceAll(".", ""));
         } catch (e) {
           debugPrint(e.toString());
           onOnlineRecognizingError();
@@ -101,6 +100,4 @@ class SpeechToTextRemoteDataSource
       }
     });
   }
-
-  //void _make
 }
