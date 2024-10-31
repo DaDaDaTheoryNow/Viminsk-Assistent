@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:installed_apps/installed_apps.dart';
 import 'package:viminsk_assistent/config/contants.dart';
 import 'package:viminsk_assistent/service/speech_action/data/datasource/remote/ai_interface_datasource.dart';
-import 'package:viminsk_assistent/service/speech_action/domain/models/action_type.dart';
 
 class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
   final Dio dio;
@@ -37,7 +35,6 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
         return '';
       } else {
         return '';
-        //throw Exception('Error during request: $e');
       }
     }
   }
@@ -60,58 +57,58 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
   }
 
   @override
-  Future<String> startApp({required String question}) async {
-    if (listOfAppsTable.isEmpty) {
-      final listOfApps = await InstalledApps.getInstalledApps();
-      listOfAppsTable = listOfApps
-          .map((app) => {
-                "app_name": app.name.toLowerCase(),
-                "package_name": app.packageName,
-              })
-          .toList();
-    }
-
-    final input = {
-      "model": "mistralai/Mistral-Nemo-Instruct-2407",
-      "messages": [
-        {
-          "role": "user",
-          "content":
-              "'$question'. Контекст: Ответом должен быть только один packageName из моего списка, в точности как указано. Ответ должен состоять только из одного packageName без других слов, текста или символов. Список приложений чтобы выбрать: $listOfAppsTable",
-        },
-      ],
-      "max_tokens": 400,
-    };
-
-    String answer = await _postRequest(input);
-    return answer.replaceAll(RegExp(r"[\'\[\]\s]"), "");
-  }
-
-  @override
-  Future<ActionType> questionType({required String question}) async {
-    final input = {
-      "model": "mistralai/Mistral-Nemo-Instruct-2407",
-      "messages": [
-        {
-          "role": "user",
-          "content":
-              "Отвечай 'startApp' если тебя просят запустить или открыть приложение, или 'question' if it’s a general question, depending on the content of the question: '$question'."
-        },
-      ],
-      "max_tokens": 300,
-    };
-
-    String answer = await _postRequest(input);
-
-    if (answer.contains("startApp") || answer.contains("start")) {
-      return ActionType.startApp;
-    } else {
-      return ActionType.question;
-    }
-  }
-
-  @override
   void cancelRequest() {
     _cancelToken.cancel("Request canceled by user");
   }
+
+  // @override
+  // Future<String> startApp({required String question}) async {
+  //   if (listOfAppsTable.isEmpty) {
+  //     final listOfApps = await InstalledApps.getInstalledApps();
+  //     listOfAppsTable = listOfApps
+  //         .map((app) => {
+  //               "app_name": app.name.toLowerCase(),
+  //               "package_name": app.packageName,
+  //             })
+  //         .toList();
+  //   }
+
+  //   final input = {
+  //     "model": "mistralai/Mistral-Nemo-Instruct-2407",
+  //     "messages": [
+  //       {
+  //         "role": "user",
+  //         "content":
+  //             "'$question'. Контекст: Ответом должен быть только один packageName из моего списка, в точности как указано. Ответ должен состоять только из одного packageName без других слов, текста или символов. Список приложений чтобы выбрать: $listOfAppsTable",
+  //       },
+  //     ],
+  //     "max_tokens": 400,
+  //   };
+
+  //   String answer = await _postRequest(input);
+  //   return answer.replaceAll(RegExp(r"[\'\[\]\s]"), "");
+  // }
+
+  // @override
+  // Future<ActionType> questionType({required String question}) async {
+  //   final input = {
+  //     "model": "mistralai/Mistral-Nemo-Instruct-2407",
+  //     "messages": [
+  //       {
+  //         "role": "user",
+  //         "content":
+  //             "Отвечай 'question' если это вопрос о тебе или просто вопрос, или 'startApp' если тебя просят запустить или открыть приложение: '$question'."
+  //       },
+  //     ],
+  //     "max_tokens": 300,
+  //   };
+
+  //   String answer = await _postRequest(input);
+
+  //   if (answer.contains("startApp") || answer.contains("start")) {
+  //     return ActionType.startApp;
+  //   } else {
+  //     return ActionType.question;
+  //   }
+  // }
 }
