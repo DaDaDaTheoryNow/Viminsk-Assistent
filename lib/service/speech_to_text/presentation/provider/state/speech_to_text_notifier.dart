@@ -18,9 +18,14 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
   ) : super(const SpeechToTextState());
 
   Future<bool> initialize() async {
-    if (await _requestMicrophonePermission()) {
-      return await speechToTextRepository.initializeOffline();
+    if (!await _requestMicrophonePermission()) return false;
+
+    if (await speechToTextRepository.initializeOffline()) {
+      // Load installed apps for the 'open app' command
+      await speechActionRepository.initializeInstalledApps();
+      return true;
     }
+
     return false;
   }
 

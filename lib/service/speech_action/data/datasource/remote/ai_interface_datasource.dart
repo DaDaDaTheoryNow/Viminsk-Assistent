@@ -9,6 +9,7 @@ abstract class AIInterfaceDataSource {
 
   Future<String> startApp({
     required String question,
+    required List<Map<String, String>> mapOfInstalledApps,
   });
 
   Future<ActionType> questionType({

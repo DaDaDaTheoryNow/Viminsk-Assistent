@@ -1,9 +1,9 @@
 import 'package:contacts_service/contacts_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 import 'package:viminsk_assistent/service/speech_action/data/datasource/remote/ai_interface_datasource.dart';
 import 'package:viminsk_assistent/service/speech_action/domain/models/action_type.dart';
 import 'package:viminsk_assistent/service/speech_action/domain/repositories/speech_action_repository.dart';
@@ -13,6 +13,23 @@ class SpeechActionRepositoryImpl extends SpeechActionRepository {
 
   SpeechActionRepositoryImpl(this.aiInterfaceDataSource);
 
+  List<Map<String, String>> mapOfInstalledApps = [];
+
+  @override
+  Future<void> initializeInstalledApps() async {
+    if (mapOfInstalledApps.isEmpty) {
+      final listOfInstalledApps = await InstalledApps.getInstalledApps();
+      mapOfInstalledApps = listOfInstalledApps
+          .map((app) => {
+                "app_name": app.name.toLowerCase(),
+                "package_name": app.packageName,
+              })
+          .toList();
+    }
+
+    return;
+  }
+
   @override
   void cancelProcessCommand() {
     aiInterfaceDataSource.cancelRequest();
@@ -20,107 +37,113 @@ class SpeechActionRepositoryImpl extends SpeechActionRepository {
 
   @override
   Future<String> processCommand(String message) async {
-    final messageForAnalysis = message.toLowerCase();
+    final query = message.toLowerCase();
 
-    if (messageForAnalysis.contains("загугли") ||
-        messageForAnalysis.contains("найди")) {
-      _searchInBrowser(messageForAnalysis);
-      return "Выполнил поиск";
+    if (query.contains("загугли") ||
+        query.contains("найди") ||
+        query.contains("за гугли")) {
+      return await _searchInBrowser(query);
     }
 
-    final questionType =
-        await aiInterfaceDataSource.questionType(question: messageForAnalysis);
-    print(questionType);
-    switch (questionType) {
+    final actionType =
+        await aiInterfaceDataSource.questionType(question: query);
+
+    debugPrint("Тип команды: $actionType");
+
+    switch (actionType) {
       case ActionType.startApp:
-        if (messageForAnalysis.contains("браузер") ||
-            messageForAnalysis.contains("chrome") ||
-            messageForAnalysis.contains("поисковик")) {
-          return _startBrowser();
-        }
-
-        final appPackage =
-            await aiInterfaceDataSource.startApp(question: messageForAnalysis);
-
-        if (appPackage.isEmpty) return "";
-
-        final bool? isSuccess = await InstalledApps.startApp(appPackage);
-        return isSuccess ?? false
-            ? "Запустил приложение"
-            : "Не смог запустить приложение";
+        return await _handleAppStart(query);
       case ActionType.question:
-        return await aiInterfaceDataSource.questionAnswer(
-            question: messageForAnalysis);
+        return await aiInterfaceDataSource.questionAnswer(question: query);
       case ActionType.call:
-        return _call(messageForAnalysis);
+        return await _makeCall(query);
       default:
         return "Неизвестная команда";
     }
   }
 
   Future<String> _searchInBrowser(String message) async {
-    List<String> wordsToRemove = ["найди"];
-    RegExp regExp = RegExp(wordsToRemove.join("|"));
-    String result = message.replaceFirst(regExp, '');
+    final cleanedMessage = message.replaceFirst(RegExp("найди"), '');
+    final encodedQuery = Uri.encodeComponent(cleanedMessage);
+    final url = Uri.parse("https://www.google.com/search?q=$encodedQuery");
 
-    final query = Uri.encodeComponent(result);
-    final Uri uri = Uri.parse("https://www.google.com/search?q=$query");
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+      return "Поиск выполнен";
+    }
+    return 'Не удалось выполнить поиск';
+  }
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+  Future<String> _handleAppStart(String query) async {
+    // Check for specific apps directly
+    if (query.contains("браузер") ||
+        query.contains("chrome") ||
+        query.contains("поисковик")) {
+      return await _openBrowser();
+    }
+
+    // App launch by package name
+    final appPackage = await aiInterfaceDataSource.startApp(
+      question: query,
+      mapOfInstalledApps: mapOfInstalledApps,
+    );
+
+    if (appPackage.isEmpty) return "Приложение не найдено";
+
+    final success = await InstalledApps.startApp(appPackage) ?? false;
+    return success ? "Приложение запущено" : "Ошибка при запуске приложения";
+  }
+
+  Future<String> _openBrowser() async {
+    final url = Uri.parse("https://www.google.com");
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+      return "Браузер открыт";
+    }
+    return 'Не удалось открыть браузер';
+  }
+
+  Future<String> _makeCall(String query) async {
+    final contacts = await _fetchContacts();
+    final phone = await aiInterfaceDataSource.phoneNumber(
+      question: query,
+      contacts: contacts,
+    );
+
+    debugPrint(phone);
+
+    if (phone.isNotEmpty) {
+      _initiatePhoneCall(phone);
+      return "Звонок совершен";
+    }
+    return "Контакт не найден";
+  }
+
+  Future<Map<String, String>> _fetchContacts() async {
+    var permissionStatus = await Permission.contacts.status;
+    if (!permissionStatus.isGranted) {
+      permissionStatus = await Permission.contacts.request();
+    }
+
+    if (permissionStatus.isGranted) {
+      final contacts = await ContactsService.getContacts();
+      return {
+        for (var contact in contacts)
+          if (contact.phones!.isNotEmpty)
+            contact.displayName ?? 'Без имени':
+                contact.phones!.first.value ?? ''
+      };
     } else {
-      return 'Не удалось открыть ссылку';
-    }
-
-    return "Вбил в браузер ваш запрос";
-  }
-
-  Future<String> _startBrowser() async {
-    final Uri uri = Uri.parse("https://www.google.com/search");
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      return 'Не удалось открыть браузер';
-    }
-
-    return "Запустил приложение";
-  }
-
-  Future<String> _call(String question) async {
-    final String phone = await aiInterfaceDataSource.phoneNumber(
-        question: question, contacts: await getContacts());
-    makePhoneCall(phone);
-    return "Сделал звонок";
-  }
-
-  Future<Map<String, String>> getContacts() async {
-    var status = await Permission.contacts.status;
-    if (!status.isGranted) {
-      status = await Permission.contacts.request();
-    }
-
-    if (status.isGranted) {
-      Iterable<Contact> contacts = await ContactsService.getContacts();
-      Map<String, String> contactsMap = {};
-      for (var contact in contacts) {
-        if (contact.phones!.isNotEmpty) {
-          contactsMap[contact.displayName ?? 'Без имени'] =
-              contact.phones!.first.value ?? '';
-        }
-      }
-      return contactsMap;
-    } else {
-      throw 'Разрешение на доступ к контактам не получено';
+      throw 'Отказано в доступе к контактам';
     }
   }
 
-  Future<void> makePhoneCall(String phoneNumber) async {
-    const platform = MethodChannel('com.example.call_channel');
+  void _initiatePhoneCall(String phoneNumber) async {
+    const channel = MethodChannel('com.example.call_channel');
     try {
-      await platform.invokeMethod('makeCall', {'phoneNumber': phoneNumber});
+      channel.invokeMethod('makeCall', {'phoneNumber': phoneNumber});
     } on PlatformException catch (e) {
-      print("Ошибка при вызове звонка: ${e.message}");
+      debugPrint("Ошибка при совершении звонка: ${e.message}");
     }
   }
 }
