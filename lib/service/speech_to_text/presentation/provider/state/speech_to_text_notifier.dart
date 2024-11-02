@@ -34,6 +34,8 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
       state = state.copyWith(isInitialize: true);
       await speechToTextRepository.startOfflineListeningForCall(
         onCallAssistant: () async {
+          textToSpeechRepository.stop();
+
           final tempSpeechActionResult = state.speechActionResult;
           state = state.copyWith(isListening: true, speechActionResult: "");
 
