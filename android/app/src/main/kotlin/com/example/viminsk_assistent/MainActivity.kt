@@ -14,16 +14,15 @@ class MainActivity: FlutterActivity() {
     private val CALL_REQUEST_CODE = 1
     private val CHANNEL = "com.example.call_channel"
 
+    private var phoneNumber: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Проверяем, что binaryMessenger не null, прежде чем создать MethodChannel
         flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
             MethodChannel(messenger, CHANNEL).setMethodCallHandler { call, result ->
                 if (call.method == "makeCall") {
-                    val phoneNumber = call.argument<String>("phoneNumber")
+                    phoneNumber = call.argument<String>("phoneNumber")
                     if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                        // Запрос разрешения на звонок
                         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CALL_PHONE), CALL_REQUEST_CODE)
                     } else {
                         makePhoneCall(phoneNumber)
@@ -45,7 +44,6 @@ class MainActivity: FlutterActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CALL_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                val phoneNumber = "1234567890" // Здесь можно передать номер из Flutter, если сохранить его в переменной
                 makePhoneCall(phoneNumber)
             }
         }

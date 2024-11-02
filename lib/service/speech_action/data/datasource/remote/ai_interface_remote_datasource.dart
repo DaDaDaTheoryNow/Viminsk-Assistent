@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:installed_apps/installed_apps.dart';
 import 'package:viminsk_assistent/config/contants.dart';
 import 'package:viminsk_assistent/service/speech_action/data/datasource/remote/ai_interface_datasource.dart';
 import 'package:viminsk_assistent/service/speech_action/domain/models/action_type.dart';
@@ -9,7 +8,6 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
   final Dio dio;
 
   CancelToken _cancelToken = CancelToken();
-  List<Map<String, String>> listOfAppsTable = [];
 
   AIInterfaceRemoteDataSource() : dio = Dio() {
     dio.options.headers['Authorization'] = "Bearer $kApiKey";
@@ -59,29 +57,17 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
   }
 
   @override
-  void cancelRequest() {
-    _cancelToken.cancel("Request canceled by user");
-  }
-
-  @override
-  Future<String> startApp({required String question}) async {
-    if (listOfAppsTable.isEmpty) {
-      final listOfApps = await InstalledApps.getInstalledApps();
-      listOfAppsTable = listOfApps
-          .map((app) => {
-                "app_name": app.name.toLowerCase(),
-                "package_name": app.packageName,
-              })
-          .toList();
-    }
-
+  Future<String> startApp({
+    required String question,
+    required List<Map<String, String>> mapOfInstalledApps,
+  }) async {
     final input = {
       "model": "mistralai/Mistral-Nemo-Instruct-2407",
       "messages": [
         {
           "role": "user",
           "content":
-              "'$question'. Контекст: Ответом должен быть только один packageName из моего списка, в точности как указано. Ответ должен состоять только из одного packageName без других слов, текста или символов. Список приложений чтобы выбрать: $listOfAppsTable",
+              "'$question'. Контекст: Ответом должен быть только один packageName из моего списка, в точности как указано. Ответ должен состоять только из одного packageName без других слов, текста или символов. Список приложений чтобы выбрать: $mapOfInstalledApps",
         },
       ],
       "max_tokens": 400,
@@ -117,8 +103,10 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
   }
 
   @override
-  Future<String> phoneNumber(
-      {required String question, required Map contacts}) async {
+  Future<String> phoneNumber({
+    required String question,
+    required Map contacts,
+  }) async {
     final input = {
       "model": "mistralai/Mistral-Nemo-Instruct-2407",
       "messages": [
@@ -132,5 +120,10 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
     };
 
     return await _postRequest(input);
+  }
+
+  @override
+  void cancelRequest() {
+    _cancelToken.cancel("Request canceled by user");
   }
 }
