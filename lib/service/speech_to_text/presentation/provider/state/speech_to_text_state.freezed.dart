@@ -21,6 +21,7 @@ mixin _$SpeechToTextState {
   String get recognizedWords => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String get speechActionResult => throw _privateConstructorUsedError;
+  bool get isInitialize => throw _privateConstructorUsedError;
 
   /// Create a copy of SpeechToTextState
   /// with the given fields replaced by the non-null parameter values.
@@ -40,7 +41,8 @@ abstract class $SpeechToTextStateCopyWith<$Res> {
       double soundLevel,
       String recognizedWords,
       bool isLoading,
-      String speechActionResult});
+      String speechActionResult,
+      bool isInitialize});
 }
 
 /// @nodoc
@@ -63,6 +65,7 @@ class _$SpeechToTextStateCopyWithImpl<$Res, $Val extends SpeechToTextState>
     Object? recognizedWords = null,
     Object? isLoading = null,
     Object? speechActionResult = null,
+    Object? isInitialize = null,
   }) {
     return _then(_value.copyWith(
       isListening: null == isListening
@@ -85,6 +88,10 @@ class _$SpeechToTextStateCopyWithImpl<$Res, $Val extends SpeechToTextState>
           ? _value.speechActionResult
           : speechActionResult // ignore: cast_nullable_to_non_nullable
               as String,
+      isInitialize: null == isInitialize
+          ? _value.isInitialize
+          : isInitialize // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -102,7 +109,8 @@ abstract class _$$SpeechToTextStateImplCopyWith<$Res>
       double soundLevel,
       String recognizedWords,
       bool isLoading,
-      String speechActionResult});
+      String speechActionResult,
+      bool isInitialize});
 }
 
 /// @nodoc
@@ -123,6 +131,7 @@ class __$$SpeechToTextStateImplCopyWithImpl<$Res>
     Object? recognizedWords = null,
     Object? isLoading = null,
     Object? speechActionResult = null,
+    Object? isInitialize = null,
   }) {
     return _then(_$SpeechToTextStateImpl(
       isListening: null == isListening
@@ -145,6 +154,10 @@ class __$$SpeechToTextStateImplCopyWithImpl<$Res>
           ? _value.speechActionResult
           : speechActionResult // ignore: cast_nullable_to_non_nullable
               as String,
+      isInitialize: null == isInitialize
+          ? _value.isInitialize
+          : isInitialize // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -157,7 +170,8 @@ class _$SpeechToTextStateImpl extends _SpeechToTextState {
       this.soundLevel = 0.0,
       this.recognizedWords = "",
       this.isLoading = false,
-      this.speechActionResult = "Привет, как дела?"})
+      this.speechActionResult = "Привет, как дела?",
+      this.isInitialize = false})
       : super._();
 
   @override
@@ -175,10 +189,13 @@ class _$SpeechToTextStateImpl extends _SpeechToTextState {
   @override
   @JsonKey()
   final String speechActionResult;
+  @override
+  @JsonKey()
+  final bool isInitialize;
 
   @override
   String toString() {
-    return 'SpeechToTextState(isListening: $isListening, soundLevel: $soundLevel, recognizedWords: $recognizedWords, isLoading: $isLoading, speechActionResult: $speechActionResult)';
+    return 'SpeechToTextState(isListening: $isListening, soundLevel: $soundLevel, recognizedWords: $recognizedWords, isLoading: $isLoading, speechActionResult: $speechActionResult, isInitialize: $isInitialize)';
   }
 
   @override
@@ -195,12 +212,14 @@ class _$SpeechToTextStateImpl extends _SpeechToTextState {
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
             (identical(other.speechActionResult, speechActionResult) ||
-                other.speechActionResult == speechActionResult));
+                other.speechActionResult == speechActionResult) &&
+            (identical(other.isInitialize, isInitialize) ||
+                other.isInitialize == isInitialize));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, isListening, soundLevel,
-      recognizedWords, isLoading, speechActionResult);
+      recognizedWords, isLoading, speechActionResult, isInitialize);
 
   /// Create a copy of SpeechToTextState
   /// with the given fields replaced by the non-null parameter values.
@@ -218,7 +237,8 @@ abstract class _SpeechToTextState extends SpeechToTextState {
       final double soundLevel,
       final String recognizedWords,
       final bool isLoading,
-      final String speechActionResult}) = _$SpeechToTextStateImpl;
+      final String speechActionResult,
+      final bool isInitialize}) = _$SpeechToTextStateImpl;
   const _SpeechToTextState._() : super._();
 
   @override
@@ -231,6 +251,8 @@ abstract class _SpeechToTextState extends SpeechToTextState {
   bool get isLoading;
   @override
   String get speechActionResult;
+  @override
+  bool get isInitialize;
 
   /// Create a copy of SpeechToTextState
   /// with the given fields replaced by the non-null parameter values.

@@ -1,3 +1,5 @@
+import 'package:viminsk_assistent/service/speech_action/domain/models/action_type.dart';
+
 abstract class AIInterfaceDataSource {
   Future<String> questionAnswer({
     required String question,
@@ -5,11 +7,13 @@ abstract class AIInterfaceDataSource {
 
   void cancelRequest();
 
-  // Future<String> startApp({
-  //   required String question,
-  // });
+  Future<String> startApp({
+    required String question,
+  });
 
-  // Future<ActionType> questionType({
-  //   required String question,
-  // });
+  Future<ActionType> questionType({
+    required String question,
+  });
+
+  Future<String> phoneNumber({required String question, required Map contacts});
 }

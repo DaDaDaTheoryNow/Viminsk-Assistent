@@ -26,6 +26,7 @@ class SpeechToTextNotifier extends StateNotifier<SpeechToTextState> {
 
   Future<void> startListeningForCommand() async {
     if (await initialize()) {
+      state = state.copyWith(isInitialize: true);
       await speechToTextRepository.startOfflineListeningForCall(
         onCallAssistant: () async {
           final tempSpeechActionResult = state.speechActionResult;

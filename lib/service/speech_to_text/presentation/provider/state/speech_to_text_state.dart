@@ -10,6 +10,7 @@ class SpeechToTextState with _$SpeechToTextState {
     @Default("") String recognizedWords,
     @Default(false) bool isLoading,
     @Default("Привет, как дела?") String speechActionResult,
+    @Default(false) bool isInitialize,
   }) = _SpeechToTextState;
 
   const SpeechToTextState._();
