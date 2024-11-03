@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -11,6 +12,10 @@ import 'config/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await FlutterVolumeController.setVolume(0.0);
+  // print(await FlutterVolumeController.getVolume());
+  // await FlutterVolumeController.setVolume(0.4);
 
   if (Platform.isWindows) {
     await windowManager.ensureInitialized();

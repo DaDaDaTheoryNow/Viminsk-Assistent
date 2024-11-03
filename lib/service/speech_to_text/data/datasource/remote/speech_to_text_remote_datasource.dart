@@ -21,7 +21,7 @@ class SpeechToTextRemoteDataSource
 
   final AudioRecorder _recorder = AudioRecorder();
   Timer? _silenceTimer;
-  final double amplitudeThreshold = (Platform.isWindows) ? 4.4 : 6;
+  final double amplitudeThreshold = (Platform.isWindows) ? 4.5 : 6;
   final Duration silenceDuration =
       const Duration(seconds: 1, milliseconds: 700);
 

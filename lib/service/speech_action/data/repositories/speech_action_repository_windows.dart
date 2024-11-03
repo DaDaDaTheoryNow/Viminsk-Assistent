@@ -7,8 +7,6 @@ import 'speech_action_repository_impl.dart';
 
 extension WindowsSpeechAction on SpeechActionRepositoryImpl {
   Future<String> processWindowsCommand(String query) async {
-    print(query);
-    print(query.contains("найди"));
     if (query.contains("гугли") || query.contains("найди")) {
       return await _searchInBrowser(query);
     }

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
-import 'package:viminsk_assistent/features/home/presentation/widgets/listening_button.dart';
 import 'package:viminsk_assistent/features/home/presentation/widgets/loading_widget.dart';
 import 'package:viminsk_assistent/features/home/presentation/widgets/sound_level_visualizer.dart';
-import 'package:viminsk_assistent/service/background/domain/provider/background_repositories_provider.dart';
 import 'package:viminsk_assistent/service/speech_to_text/presentation/provider/speech_to_text_notifier_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
