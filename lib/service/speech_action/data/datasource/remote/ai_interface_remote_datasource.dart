@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter_volume_controller/flutter_volume_controller.dart';
+import 'package:intl/intl.dart';
 import 'package:viminsk_assistent/config/contants.dart';
 import 'package:viminsk_assistent/service/speech_action/data/datasource/remote/ai_interface_datasource.dart';
 import 'package:viminsk_assistent/service/speech_action/domain/models/action_type.dart';
@@ -41,13 +43,16 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
 
   @override
   Future<String> questionAnswer({required String question}) async {
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+
     final input = {
       "model": "mistralai/Mistral-Nemo-Instruct-2407",
       "messages": [
         {
           "role": "user",
           "content":
-              "'$question'. Контекст: Отвечай только на Русском языке. *Ты голосовой помощник* Пожалуйста, отвечай коротко и ясно. Если задают вопрос о твоем имени или создателе, уточни, что ты — Viminsk, созданный командой из 167-й школы города Минска. Старайся использовать простые и понятные фразы."
+              "'$question'. Контекст: Отвечай только на Русском языке. *Ты голосовой помощник* Пожалуйста, отвечай коротко и ясно. Если задают вопрос о твоем имени или создателе, уточни, что ты — Viminsk, созданный командой из 167-й школы города Минска. Старайся использовать простые и понятные фразы, вот дата и время: $formattedDate."
         },
       ],
       "max_tokens": 400,
@@ -113,7 +118,7 @@ class AIInterfaceRemoteDataSource implements AIInterfaceDataSource {
         {
           "role": "user",
           "content":
-              "'$question'. Контекст: Выдай строго, по имени или номеру в запросе, номер телефона нужного контакта из списка, номер должен всегда начинаться на + $contacts"
+              "'$question'. Контекст: Выдай строго, по имени или номеру в запросе, номер телефона нужного контакта из списка, номер из 11 цифр который должен всегда начинаться на + и перед + не должно быть цифр $contacts"
         },
       ],
       "max_tokens": 400,

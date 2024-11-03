@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   flutter_tts
+  flutter_volume_controller
   permission_handler_windows
   record_windows
   screen_retriever_windows

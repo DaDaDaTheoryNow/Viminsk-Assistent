@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
+import 'package:viminsk_assistent/features/home/presentation/widgets/listening_button.dart';
 import 'package:viminsk_assistent/features/home/presentation/widgets/loading_widget.dart';
 import 'package:viminsk_assistent/features/home/presentation/widgets/sound_level_visualizer.dart';
+import 'package:viminsk_assistent/service/background/domain/provider/background_repositories_provider.dart';
 import 'package:viminsk_assistent/service/speech_to_text/presentation/provider/speech_to_text_notifier_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -22,6 +25,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     ref.read(speechToTextNotifierProvider.notifier).startListeningForCommand();
+    //ref.read(backgroundRepositoriesProvider).initializedBackgroundService();
     super.initState();
   }
 
@@ -34,6 +38,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final soundLevel = ref.watch(speechToTextNotifierProvider).soundLevel;
     final isInitialize = ref.watch(speechToTextNotifierProvider).isInitialize;
     return Scaffold(
+      // floatingActionButton: ListeningButton(
+      //     onStartRecording: () {
+      //       FlutterBackgroundService().invoke("setAsBackground");
+      //     },
+      //     onStopRecording: () {
+      //       FlutterBackgroundService().invoke("stopService");
+      //     },
+      //     isListening: isListening),
       body: Stack(
         children: [
           AnimatedOpacity(

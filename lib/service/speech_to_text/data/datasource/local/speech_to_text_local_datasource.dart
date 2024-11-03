@@ -58,8 +58,10 @@ class SpeechToTextLocalDataSource
         _buffer = stringResult;
 
         if (_lastProcessedIndex <= _buffer.length) {
-          final unprocessedText =
-              _buffer.substring(_lastProcessedIndex, _buffer.length).trim();
+          final unprocessedText = _buffer
+              .substring(_lastProcessedIndex, _buffer.length)
+              .trim()
+              .toLowerCase();
 
           _lastProcessedIndex = _buffer.length;
 

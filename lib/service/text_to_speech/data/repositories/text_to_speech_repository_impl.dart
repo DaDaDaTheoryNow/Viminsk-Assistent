@@ -8,10 +8,12 @@ class TextToSpeechRepositoryImpl extends TextToSpeechRepository {
   @override
   Future<void> speak(String text) async {
     await flutterTts.setLanguage("ru-RU");
+    await flutterTts
+        .setVoice({"name": "ru-ru-x-rud-network", "locale": "ru-RU"});
     await flutterTts.setPitch(1.0);
     await flutterTts.setSpeechRate(0.5);
-
     await flutterTts.speak(text);
+    //print(await flutterTts.getVoices);
   }
 
   @override

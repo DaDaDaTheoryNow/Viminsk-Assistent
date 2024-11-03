@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -12,6 +13,10 @@ extension MobileSpeechAction on SpeechActionRepositoryImpl {
   Future<String> processMobileCommand(String query) async {
     if (query.contains("гугли") || query.contains("найди")) {
       return await _searchInBrowser(query);
+    }
+
+    if (query.contains("звук") || query.contains("громкость")) {
+      return await _changeVolume(query);
     }
 
     final actionType =
@@ -111,5 +116,32 @@ extension MobileSpeechAction on SpeechActionRepositoryImpl {
     } on PlatformException catch (e) {
       debugPrint("Ошибка при совершении звонка: ${e.message}");
     }
+  }
+
+  Future<String> _changeVolume(String query) async {
+    await FlutterVolumeController.updateShowSystemUI(true);
+    if (query.contains("включи")) {
+      await FlutterVolumeController.setMute(false);
+      return "Включил звук";
+    } else if (query.contains("выключи")) {
+      await FlutterVolumeController.setMute(true);
+      return "Выключил звук";
+    }
+
+    double change = 0;
+    try {
+      change = double.parse(query.replaceAll(RegExp(r'[^0-9]'), '')) / 100;
+    } catch (e) {
+      return "Я не услышал как мне изменить громкость на устройстве";
+    }
+
+    if (query.contains("увеличь")) {
+      await FlutterVolumeController.raiseVolume(change);
+    } else if (query.contains("уменьши")) {
+      await FlutterVolumeController.lowerVolume(change);
+    } else if (query.contains("установи")) {
+      await FlutterVolumeController.setVolume(change);
+    }
+    return "Изменил звук";
   }
 }
