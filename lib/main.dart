@@ -13,7 +13,7 @@ import 'config/theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await FlutterVolumeController.setVolume(0.0);
+  //await FlutterVolumeController.setVolume(0.0);
   // print(await FlutterVolumeController.getVolume());
   // await FlutterVolumeController.setVolume(0.4);
 
